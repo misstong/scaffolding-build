@@ -59,18 +59,24 @@ module.exports = grunt => {
                 tasks: ['sass']
             }
         },
-        clean: ['dist','.tmp'],
+        clean: ['dist','.tmp','build'],
         copy: {
             main: {
                 files: [
-                    {expand: true, src:['public/*'],dest: 'dist'}
+                    {expand: true, src:['public/*'],dest: 'build'},
+                    {expand:true, src: ['assets/fonts/*','assets/images/*'],dest:'build',cwd:'src'}
+                ]
+            },
+            build: {
+                files: [
+                    {expand:true, src: ['*.html'],dest:'build',cwd:'dist'}
                 ]
             }
         },
         useminPrepare: {
             html: 'dist/index.html',
             options: {
-                dest: 'dist',
+                dest: 'build',
                 root: ['dist','.']
             }
         },
@@ -80,30 +86,43 @@ module.exports = grunt => {
                assetsDirs: ['build/assets'],
            } 
         },
+        browserSync: {
+            bsFiles: {
+                src : ['dist/**','public/**','src/**']
+            },
+            options: {
+                server: {
+                    baseDir: "./"
+                }
+            }
+        }
     })
 
     grunt.loadNpmTasks('grunt-sass')
     grunt.loadNpmTasks('grunt-swig-precompile');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    // grunt.loadNpmTasks('grunt-contrib-imagemin');
     
     loadGruntTasks(grunt)
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-usemin');
+    grunt.loadNpmTasks('grunt-browser-sync');
+
     grunt.registerTask('build', [
+        'clean','sass','babel','swig_precompile',
         'useminPrepare',
         'concat',
         'cssmin',
         'uglify',
         // 'filerev',
-        'usemin'
+        'usemin',
+        'copy'
       ]);
 
     grunt.registerTask('clear', 'clean')
-    grunt.registerTask('compile', ['sass','babel','swig_precompile']) //,'watch'
+    grunt.registerTask('compile', ['clean','sass','babel','swig_precompile']) //,'watch'
     grunt.registerTask('extra', 'copy')
-    // grunt.registerTask('page', 'swig_precompile')
+    grunt.registerTask('serve','browserSync')
 
 }
